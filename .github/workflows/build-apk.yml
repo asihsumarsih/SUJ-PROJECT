@@ -10,7 +10,17 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-
+      - name: Extract SUJ Project
+        run: |
+          mkdir extracted
+          unzip -o SUJ_SOURCE*.zip -d extracted
+          SETTINGS=$(find extracted -name settings.gradle.kts | head -n 1)
+          if [ -z "$SETTINGS" ]; then
+            echo "settings.gradle.kts tidak ditemukan"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$SETTINGS")
+          cp -a "$PROJECT_DIR"/. .
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
