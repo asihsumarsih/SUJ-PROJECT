@@ -13,7 +13,7 @@ jobs:
       - name: Extract SUJ Project
         run: |
           mkdir extracted
-          unzip -o SUJ_SOURCE*.zip -d extracted
+          unzip -o "SUJ_SOURCE (1).zip" -d extracted
           SETTINGS=$(find extracted -name settings.gradle.kts | head -n 1)
           if [ -z "$SETTINGS" ]; then
             echo "settings.gradle.kts tidak ditemukan"
