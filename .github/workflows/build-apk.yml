@@ -33,6 +33,23 @@ jobs:
           PROJECT_DIR=$(dirname "$SETTINGS")
           cp -a "$PROJECT_DIR"/. .
 
+      - name: Fix app Gradle file
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("app/build.gradle.kts")
+
+          if not p.exists():
+              raise SystemExit("app/build.gradle.kts tidak ditemukan")
+
+          text = p.read_text()
+          text = text.replace("\\n", "\n")
+          p.write_text(text)
+
+          print("File app/build.gradle.kts diperbaiki")
+          PY
+          
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
