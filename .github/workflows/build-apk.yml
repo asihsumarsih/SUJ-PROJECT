@@ -7,54 +7,39 @@ jobs:
 build:
 runs-on: ubuntu-latest
 
-steps:
-  - name: Checkout source
-    uses: actions/checkout@v4
+steps:  
+  - name: Checkout source  
+    uses: actions/checkout@v4  
+  - name: Extract SUJ Project  
+    run: |  
+      mkdir extracted  
+      unzip -o "SUJ_SOURCE (1).zip" -d extracted  
+      SETTINGS=$(find extracted -name settings.gradle.kts | head -n 1)  
+      if [ -z "$SETTINGS" ]; then  
+        echo "settings.gradle.kts tidak ditemukan"  
+        exit 1  
+      fi  
+      PROJECT_DIR=$(dirname "$SETTINGS")  
+      cp -a "$PROJECT_DIR"/. .  
+  - name: Setup JDK  
+    uses: actions/setup-java@v4  
+    with:  
+      distribution: temurin  
+      java-version: 17  
 
-  - name: Extract SUJ Project
-    run: |
-      mkdir -p extracted
-      ZIP_FILE=$(find . -maxdepth 1 -type f -iname "*.zip" | head -n 1)
+  - name: Setup Android SDK  
+    uses: android-actions/setup-android@v4  
 
-      if [ -z "$ZIP_FILE" ]; then
-        echo "File ZIP tidak ditemukan"
-        ls -la
-        exit 1
-      fi
+  - name: Setup Gradle  
+    uses: gradle/actions/setup-gradle@v4  
+    with:  
+      gradle-version: '8.7'  
 
-      echo "Menggunakan file: $ZIP_FILE"
-      unzip -o "$ZIP_FILE" -d extracted
+  - name: Build APK  
+    run: gradle assembleDebug  
 
-      SETTINGS=$(find extracted -name settings.gradle.kts -o -name settings.gradle | head -n 1)
-
-      if [ -z "$SETTINGS" ]; then
-        echo "File settings.gradle tidak ditemukan"
-        find extracted -maxdepth 4 -type f
-        exit 1
-      fi
-
-      PROJECT_DIR=$(dirname "$SETTINGS")
-      cp -a "$PROJECT_DIR"/. .
-
-  - name: Setup JDK
-    uses: actions/setup-java@v4
-    with:
-      distribution: temurin
-      java-version: 17
-
-  - name: Setup Android SDK
-    uses: android-actions/setup-android@v4
-
-  - name: Setup Gradle
-    uses: gradle/actions/setup-gradle@v4
-    with:
-      gradle-version: '8.7'
-
-  - name: Build APK
-    run: gradle assembleDebug
-
-  - name: Upload APK
-    uses: actions/upload-artifact@v4
-    with:
-      name: SUJ-PROJECT-APK
+  - name: Upload APK  
+    uses: actions/upload-artifact@v4  
+    with:  
+      name: SUJ-PROJECT-APK  
       path: app/build/outputs/apk/debug/*.apk
